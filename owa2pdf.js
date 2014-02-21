@@ -2,11 +2,11 @@
  * owa2pdf
  * https://github.com/anseki/owa2pdf
  *
- * Copyright (c) 2013 anseki
+ * Copyright (c) 2014 anseki
  * Licensed under the MIT license.
  */
 
-(function() {
+;(function(undefined) {
   'use strict';
 
   var page = require('webpage').create(),
@@ -19,12 +19,12 @@
     debugScrnFile, debugScrnCnt,
 
     TIMEOUT = 30,
-    JQ_PATH = './jquery-2.0.3.min.js',
+    JQ_PATH = './jquery-2.1.0.min.js',
     defaultReqHeaders = {'Accept-Language': 'en-US,en;q=0.8'},
     DEBUG = 0, // >=1: Message, bit2: Screenshot, bit3: Resource I/O
 
     // Temporary file Utility (path, baseName, baseNameRe)
-    // SkyDrive is a stickler for file name.
+    // OneDrive is a stickler for file name.
     tmpFile = {
       init: function(dirPath, ext) {
         this.dirPath = dirPath;
@@ -69,7 +69,7 @@
         ppoint: '#PptJewel\\.Print-Menu32'
       },
       cmdPrintSub: {
-        word:   '#jbtnPrintToPdf-Menu48',
+        word:   '#jbtnDirectPrint-Menu48',
         excel:  '#m_excelWebRenderer_ewaCtl_Jewel\\.Print-Menu48',
         ppoint: '#PptJewel\\.Print\\.PrintToPdf-Menu48'
       },
@@ -77,7 +77,8 @@
         dialog: '#ewaDialogInner', // visibility: visible;
         optEntire: '#printEntireItem',
         btnPrint: 'button[type="submit"].ewa-dlg-button',
-        ctrlArea: '#print_bar,.spacer.noprint'
+        ctrlArea: '#print_bar,.spacer.noprint',
+        loading: 'print_loading_div',
       },
       linkPdf: '#PrintPDFLink',
       cmdRemove: '.c_mcp .uxfa_m li a'
@@ -337,7 +338,7 @@
   // page.settings.loadImages = false;
   // If page.settings.webSecurityEnabled isn't set to false,
   // XMLHttpRequest can't do cross-domain. But, it seem to no problem?
-  // Or, Office Web Apps need it?
+  // Or, Office Online need it?
   page.settings.webSecurityEnabled = false;
   // page.settings.localToRemoteUrlAccessEnabled = true;
   // MS may kick PhantomJS someday.
@@ -353,9 +354,9 @@
   pageInit();
   // "jQuery" must be used instead of "$" in the page. $ is undefined.
   // Don't use jQuery in navigation.
-  // ============================ Step 00: Open SkyDrive login page
+  // ============================ Step 00: Open OneDrive login page
   dfdAction('Step 00',
-    'https://skydrive.live.com/',
+    'https://onedrive.live.com/?gologin=1',
     // Current PhantomJS can't parse cookie jar and persistent login.
     // Therefore, do login every time.
     function() {
@@ -553,12 +554,14 @@ https://github.com/ariya/phantomjs/blob/269154071100332c201fc619b658b07d9fdd6cd6
     function() {
       return (uriAppFrame = page.evaluate(function(selector) {
         return jQuery(selector.cmdView).filter(function() {
-            return (/^open\b.+\bweb app$/i).test(jQuery(this).text());
+            var jqMenuItem = jQuery(this), href = jqMenuItem.prop('href') || '';
+            return (/^open\b.+\bweb app$/i).test(jqMenuItem.text()) ||
+              href.indexOf('/view.aspx') > -1;
           }).prop('href');
       }, selector)) ? true : false;
     }
   ); })
-  // ============================ Step 06: Open file via Office Web Apps
+  // ============================ Step 06: Open file via Office Online
   .then(function() { return dfdAction('Step 06',
     function() {
       if (uriApp) {
@@ -799,10 +802,14 @@ https://github.com/ariya/phantomjs/blob/269154071100332c201fc619b658b07d9fdd6cd6
             }
             if (status === 'success') {
               if (newPage.evaluate(function(selector) {
-                    var elms = document.querySelectorAll(selector.cmdExcel.ctrlArea), i;
-                    if (!elms.length) { return false; }
-                    for (i = elms.length - 1; i >= 0; i--) {
-                      elms[i].style.display = 'none';
+                    var elmLoading = document.getElementById(selector.cmdExcel.loading),
+                      elmsCtrl = document.querySelectorAll(selector.cmdExcel.ctrlArea), i;
+                    if (!elmLoading ||
+                        window.getComputedStyle(elmLoading, '').display !== 'none' ||
+                        !elmsCtrl.length)
+                      { return false; }
+                    for (i = elmsCtrl.length - 1; i >= 0; i--) {
+                      elmsCtrl[i].style.display = 'none';
                     }
                     return true;
                   }, selector)) {
