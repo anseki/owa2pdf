@@ -1,9 +1,9 @@
 # owa2pdf
 
-Convert MS-Office (Word/Excel/PowerPoint) documents to PDF files via Office Online ([OneDrive](https://onedrive.live.com/)).
+Convert MS-Office (Word/Excel/PowerPoint) documents to PDF files via [Office Online](https://office.com/) (and [OneDrive](https://onedrive.live.com/)).
 
-The application on non-Windows machine (e.g. Web Application) use something (e.g. [Apache OpenOffice](http://www.openoffice.org/)) to convert files. But, it is difficult to parse the layout of the MS-Office document.  
-This script use the Office Online that is provided by Microsoft.
+The application on non-Windows machine (e.g. Web Application) uses something (e.g. [Apache OpenOffice](http://www.openoffice.org/)) to convert files. But, it is difficult to parse the layout of the MS-Office document.  
+owa2pdf uses the Office Online that is provided by Microsoft.
 
 ## Usage
 
@@ -20,11 +20,20 @@ The `--ignore-ssl-errors=true` option may be needed.
 phantomjs --ignore-ssl-errors=true owa2pdf.js -u "user@example.com" -p "password" -i "/path/source.docx" -o "/path/dest.pdf"
 ```
 
+## cleanpdf.pl
+
+When the PDF file which is made by Office Online is opened by Adobe Reader, "Print" dialog-box is displayed. It's done by script which was embedded by Office Online. And some other things are embedded by Office Online.  
+`cleanpdf.pl` removes some things which embedded by Office Online.  This is Perl script which needs PDF::API2 and CAM::PDF modules. (e.g. `cpanm PDF::API2`, `cpanm CAM::PDF`)
+
+```
+./cleanpdf.pl "/path/dest.pdf"
+```
+
 ## Notes
 
-+ This script is slow.
++ owa2pdf is slow.
 + If you have Windows machine and MS-Office, using them is better.
-+ If Microsoft release Office Online API someday, using that is better. (This script is Web scraping.)
-+ Your application might have to retry calling the script. The converting sometimes fail by various causes (e.g. network, MS server, etc.).
-+ Your application might have to use the plural accounts, if it convert many files successively.
++ If Microsoft releases Office Online API someday, using that is better. (owa2pdf is Web scraping.)
++ Your application might have to retry calling the script. The converting sometimes fails by various causes (e.g. network, MS server, etc.).
++ Your application might have to use the plural accounts, if it converts many files successively.
 
