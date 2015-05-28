@@ -44,4 +44,3 @@ Then, clean files by `cleanpdf.pl`.
 + If Microsoft releases Office Online API someday, using that is better. (owa2pdf is Web scraping.)
 + Your application might have to retry calling the script. The converting sometimes fails by various causes (e.g. network, MS server, etc.).
 + Your application might have to use the plural accounts, if it converts many files successively.
-

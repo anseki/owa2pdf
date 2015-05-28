@@ -1,6 +1,6 @@
 {
   "name": "owa2pdf",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "title": "owa2pdf",
   "description": "Convert MS-Office (Word/Excel/PowerPoint) documents to PDF files via Office Online (and OneDrive).",
   "keywords": [
@@ -19,7 +19,7 @@
     "url": "git://github.com/anseki/owa2pdf.git"
   },
   "bugs": "https://github.com/anseki/owa2pdf/issues",
-  "licenses": "MIT",
+  "license": "MIT",
   "author": {
     "name": "anseki",
     "url": "https://github.com/anseki"
